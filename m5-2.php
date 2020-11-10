@@ -38,9 +38,8 @@
     $judge=$_POST["judge"];
     $correctpass=$_POST["correctpass"];
 	
-//どちらのフォームにも入力があり新規の送信フォームを送信した場合
-    if(isset($_POST["submit"])&&$_POST["name"] != ""
-        &&$_POST["str"] != ""&&$_POST["pass"] != ""&&$_POST["judge"] == "")
+//どのフォームにも入力があり新規の送信フォームを送信した場合
+    if($name!="" && $str!="" && $pass!= "" && $judge=="")
     {
         //データレコードの挿入
         $sql = $pdo -> prepare("INSERT INTO tbtable (name, str,date,pass)  
@@ -51,12 +50,11 @@
 	    $sql -> bindParam(':pass', $pass, PDO::PARAM_STR);
 	    $sql -> execute();
 	    
-	    echo "送信しました。<br>";
+	    echo "----送信しました。----<br>";
     }
     
 //削除フォームを送信し、削除対象番号に０以上の入力がある場合
-    if(isset($_POST["delete"]) && $_POST["deletenum"] != "" 
-        && $_POST["deletenum"]>0 && $_POST["deletepass"] != "")
+    if($deletenum!="" && $deletepass!="" && $deletenum>0)
     {
         $sql = 'SELECT * FROM tbtable';
 	    $stmt = $pdo->query($sql);
@@ -64,7 +62,7 @@
 	    foreach ($results as $row)
 	    {
             //削除対象のデータでパスワードが合っている場合
-            if($row['id']==$deletenum&&$row['pass']==$deletepass)
+            if($row['id']==$deletenum && $row['pass']==$deletepass)
             {
                 //入力したデータレコードを削除
                 $id = $deletenum;
@@ -73,18 +71,18 @@
 	            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
 	            $stmt->execute();
 	    
-	            echo"削除しました。<br>";
+	            echo"----削除しました。----<br>";
             }
             //削除対象のデータでパスワードが合っていない場合
-            elseif($row['id']==$deletenum&&$row['pass']!=$deletepass)
+            elseif($row['id']==$deletenum && $row['pass']!=$deletepass)
             {
-                echo"パスワードが正しくありません。<br>";
+                echo"----パスワードが正しくありません。----<br>";
             }
 	    }
     }
 
 //編集対象番号が入力されていて、編集フォームを送信した場合
-    if(isset($_POST["edit"])&&$_POST["editnum"]!="" && $_POST["editpass"]!="")
+    if($editnum!="" && $editpass!="")
     {
         $sql = 'SELECT * FROM tbtable';
 	    $stmt = $pdo->query($sql);
@@ -92,25 +90,26 @@
 	    foreach ($results as $row)
 	    {
             //編集対象のデータでパスワードが合っている場合
-            if($row['id']==$editnum&&$row['pass']==$editpass)
+            if($row['id']==$editnum && $row['pass']==$editpass)
             {
                 //編集するデータを取得
                 $hiddeneditnum=$row['id'];
                 $editname=$row['name'];
                 $editstr=$row['str'];
                 $hiddeneditpass=$row['pass'];
+                
+                echo"----編集を行ってください。（パスワードの再入力は必要ありません。）----<br>";
             }
             //パスワードが合っていない場合
-            elseif($row['id']==$editnum&&$row['pass']!=$editpass)
+            elseif($row['id']==$editnum && $row['pass']!=$editpass)
             {
-                echo"パスワードが正しくありません。<br>";
+                echo"----パスワードが正しくありません。----<br>";
             }
 	    }
     }
     
 //編集後のフォームが入力されていて、送信フォームを送信した場合
-    if(isset($_POST["submit"])&&$_POST["name"]!=""
-    &&$_POST["str"]!=""&&$_POST["judge"]!="")
+    if($name!="" && $str!="" && $judge!="")
     {
         //入力されているデータレコードの内容を編集
         $id = $judge;
@@ -123,9 +122,9 @@
 	    $stmt -> bindParam(':str', $str, PDO::PARAM_STR);
 	    $stmt -> bindParam(':date', $date, PDO::PARAM_STR);
 	    $stmt -> bindParam(':pass', $pass, PDO::PARAM_STR);
-	    $stmt->execute();
+	    $stmt -> execute();
 	    
-	    echo"編集しました。<br>";
+	    echo"----編集しました。----<br>";
     }    
         
 ?><form action="" method="post">
@@ -138,14 +137,14 @@
 <input type="password" name="pass">
 <input type="submit" name="submit"><br>
 <br>
-<label>- - - - - - - - - - - - - - - - - - - -</label><br>
+<label><hr></label><br>
 <label>削除対象番号</label><br>
 <input type="number" name="deletenum" ><br>
 <label>パスワード</label><br>
 <input type="password" name="deletepass">
 <input type="submit" name="delete" value="削除"><br>
 <br>
-<label>- - - - - - - - - - - - - - - - - - - -</label><br>
+<label><hr></label><br>
 <label>編集対象番号</label><br>
 <input type="number" name="editnum" ><br>
 <label>パスワード</label><br>
@@ -158,16 +157,21 @@
 </form><?php
 
 //入力したデータレコードを抽出し、表示する
+    
+    echo '[ 投稿番号 , 氏名 , コメント , 投稿日時 ]<br>';
+    echo "<hr>";
+    
     $sql = 'SELECT * FROM tbtable';
 	$stmt = $pdo->query($sql);
 	$results = $stmt->fetchAll();
 	foreach ($results as $row)
 	{
+		//$rowの中にはテーブルのカラム名が入る
 		echo $row['id'].',';
 		echo $row['name'].',';
 		echo $row['str'].',';
 		echo $row['date'].'<br>';
-	    echo "<hr>";
+	echo "<hr>";
 	}
 ?>
 </body>
